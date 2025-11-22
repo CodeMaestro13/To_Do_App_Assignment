@@ -1,0 +1,33 @@
+<div class="slds-grid slds-wrap">
+  <div class="slds-col slds-size_1-of-1">
+    <div class="slds-page-header">
+      <div class="slds-grid slds-grid_align-spread">
+        <h1 class="slds-text-heading_large">My Tasks</h1>
+        <a class="slds-button slds-button_brand" routerLink="/tasks/new">Add Task</a>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="slds-col slds-size_1-of-1">
+    <ng-container *ngIf="tasks$ | async as tasks">
+      <div *ngIf="tasks.length === 0" class="slds-text-body_regular">No tasks yet.</div>
+      <ul class="slds-list_horizontal slds-wrap" *ngIf="tasks.length > 0">
+        <li *ngFor="let t of tasks" class="slds-p-around_x-small slds-m-bottom_small slds-border_bottom">
+          <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
+            <div>
+              <input type="checkbox" [checked]="t.completed" (change)="toggleComplete(t)" />
+              <strong [ngClass]="{'slds-text-body_small': t.completed}">{{ t.title }}</strong>
+              <div class="slds-text-body_small">{{ t.description }}</div>
+            </div>
+            <div>
+              <button class="slds-button slds-button_neutral" (click)="editTask(t.id)">Edit</button>
+              <button class="slds-button slds-button_destructive" (click)="deleteTask(t.id)">Delete</button>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </ng-container>
+  </div>
+</div>
