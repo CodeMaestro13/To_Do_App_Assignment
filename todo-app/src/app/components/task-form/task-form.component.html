@@ -1,23 +1,80 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()" class="slds-form_stacked slds-p-around_medium">
-  <div class="slds-form-element">
-    <label class="slds-form-element__label">Title</label>
-    <div class="slds-form-element__control">
-      <input formControlName="title" class="slds-input" />
-    </div>
-    <div *ngIf="form.get('title').touched && form.get('title').invalid" class="slds-text-color_error">Title is required</div>
-  </div>
+<div class="slds-modal slds-fade-in-open">
+  <div class="slds-modal__container">
 
-  <div class="slds-form-element">
-    <label class="slds-form-element__label">Description</label>
-    <div class="slds-form-element__control">
-      <textarea formControlName="description" class="slds-textarea"></textarea>
-    </div>
-  </div>
+    <!-- Header -->
+    <header class="slds-modal__header">
+      <h2 class="slds-text-heading_medium">
+        {{ isEdit ? 'Edit Task' : 'New Task' }}
+      </h2>
+    </header>
 
-  <div class="slds-form-element slds-m-top_small slds-grid slds-grid_align-end">
-    <div>
-      <button class="slds-button slds-button_neutral" type="button" (click)="onCancel()">Cancel</button>
-      <button class="slds-button slds-button_brand" type="submit" [disabled]="form.invalid">{{ editingId ? 'Update' : 'Add' }}</button>
+    <!-- Content -->
+    <div class="slds-modal__content slds-p-around_medium">
+      <form [formGroup]="form">
+
+        <!-- FIRST ROW -->
+        <div class="slds-grid slds-gutters">
+
+          <!-- Assigned To -->
+          <div class="slds-col">
+            <label class="slds-form-element__label">Assigned To *</label>
+            <select class="slds-input" formControlName="assignedTo">
+              <option>User 1</option>
+              <option>User 2</option>
+              <option>User 3</option>
+            </select>
+          </div>
+
+          <!-- Status -->
+          <div class="slds-col">
+            <label class="slds-form-element__label">Status *</label>
+            <select class="slds-input" formControlName="status">
+              <option>Not Started</option>
+              <option>In Progress</option>
+              <option>Completed</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- SECOND ROW -->
+        <div class="slds-grid slds-gutters slds-m-top_small">
+
+          <!-- Due Date -->
+          <div class="slds-col">
+            <label class="slds-form-element__label">Due Date *</label>
+            <input type="date" class="slds-input" formControlName="dueDate" />
+          </div>
+
+          <!-- Priority -->
+          <div class="slds-col">
+            <label class="slds-form-element__label">Priority *</label>
+            <select class="slds-input" formControlName="priority">
+              <option>Low</option>
+              <option>Normal</option>
+              <option>High</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- DESCRIPTION -->
+        <label class="slds-form-element__label slds-m-top_small">
+          Description
+        </label>
+        <textarea class="slds-textarea" formControlName="description"></textarea>
+
+      </form>
     </div>
+
+    <!-- Footer -->
+    <footer class="slds-modal__footer">
+      <button class="slds-button slds-button_neutral" (click)="close()">Cancel</button>
+      <button class="slds-button slds-button_brand" (click)="save()">Save</button>
+    </footer>
+
   </div>
-</form>
+</div>
+
+<!-- BACKDROP -->
+<div class="slds-backdrop slds-backdrop_open"></div>

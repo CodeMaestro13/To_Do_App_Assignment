@@ -1,56 +1,65 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup ,FormBuilder,Validators} from '@angular/forms';
-import { TaskService } from 'src/app/services/task.service';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { TaskService } from '../../services/task.service';
+import { Task } from '../../models/task.model';
 
 @Component({
   selector: 'app-task-form',
   templateUrl: './task-form.component.html',
   styleUrls: ['./task-form.component.scss']
 })
-export class TaskFormComponent  implements OnInit{
+export class TaskFormComponent implements OnInit {
 
-  form!:FormGroup;
-  editingId: string | null = null;
+  form!: FormGroup;
+  isEdit: boolean = false;
+  editId: string | null = null;
 
   constructor(
     private fb: FormBuilder,
+    private route: ActivatedRoute,
     private taskService: TaskService,
-    private router: Router,
-    private route: ActivatedRoute
-  ){}
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-      this.form = this.fb.group({
-        title: ['', Validators.required],
-        description: [''],
-        dueDate: ['']
-      });
+    this.form = this.fb.group({
+      assignedTo: ['', Validators.required],
+      status: ['', Validators.required],
+      dueDate: ['', Validators.required],
+      priority: ['', Validators.required],
+      description: ['']
+    });
 
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.editingId = id;
-      const task = this.taskService.getTaskById(id);
+    // Check if editing task
+    this.editId = this.route.snapshot.paramMap.get('id');
+    if (this.editId) {
+      this.isEdit = true;
+      const task = this.taskService.getTaskById(this.editId);
       if (task) {
-        this.form.patchValue({
-          // title: task.title,
-          // description: task.description,
-          // dueDate: task.dueDate ? task.dueDate.split('T')[0] : ''
-        });
+        this.form.patchValue(task);
       }
     }
   }
 
-  onSubmit() {
+  save() {
     if (this.form.invalid) return;
-    const val = this.form.value;
-    if (this.editingId) {
-      this.taskService.updateTask(this.editingId, val);
+
+    const data: Task = {
+      id: this.editId || Date.now().toString(),
+      ...this.form.value
+    };
+
+    if (this.isEdit) {
+      this.taskService.updateTask(data.id, data);
     } else {
-      this.taskService.addTask(val);
+      this.taskService.addTask(data);
     }
-    this.router.navigate(['/tasks']);
+
+    this.router.navigate(['/']);
   }
 
-  onCancel() { this.router.navigate(['/tasks']); }
+  close() {
+    this.router.navigate(['/']);
+  }
 }
