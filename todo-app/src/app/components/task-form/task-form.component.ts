@@ -37,17 +37,41 @@ export class TaskFormComponent implements OnInit {
       this.isEdit = true;
       const task = this.taskService.getTaskById(this.editId);
       if (task) {
-        this.form.patchValue(task);
+        // Format date for input field (YYYY-MM-DD)
+        const taskData = { ...task };
+        if (task.dueDate) {
+          // If date is in string format, convert it for the date input
+          const date = new Date(task.dueDate);
+          if (!isNaN(date.getTime())) {
+            // Format as YYYY-MM-DD for date input
+            taskData.dueDate = date.toISOString().split('T')[0];
+          }
+        }
+        this.form.patchValue(taskData);
+      } else {
+        // Task not found, redirect to list
+        this.router.navigate(['/']);
       }
     }
   }
 
   save() {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      // Mark all fields as touched to show validation errors
+      Object.keys(this.form.controls).forEach(key => {
+        this.form.get(key)?.markAsTouched();
+      });
+      return;
+    }
 
+    const formValue = this.form.value;
     const data: Task = {
       id: this.editId || Date.now().toString(),
-      ...this.form.value
+      assignedTo: formValue.assignedTo,
+      status: formValue.status,
+      dueDate: formValue.dueDate,
+      priority: formValue.priority,
+      description: formValue.description || ''
     };
 
     if (this.isEdit) {

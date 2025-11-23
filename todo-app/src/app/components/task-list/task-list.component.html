@@ -1,4 +1,4 @@
-<div class="slds-card slds-p-around_medium">
+<div class="slds-card slds-p-around_medium" (click)="closeDropdownOnOutsideClick($event)">
 
   <!-- Header -->
   <div class="slds-grid slds-grid_align-spread slds-m-bottom_small">
@@ -12,7 +12,7 @@
 
   <!-- Search -->
   <div class="slds-input-has-icon slds-input-has-icon_right slds-m-bottom_small">
-    <input type="text" class="slds-input" placeholder="Search" [(ngModel)]="searchText" />
+    <input type="text" class="slds-input" placeholder="Search" [(ngModel)]="searchText" (ngModelChange)="onSearchChange()" />
     <span class="slds-icon_container slds-input__icon slds-input__icon_right">
       🔍
     </span>
@@ -32,65 +32,122 @@
     </thead>
 
     <tbody>
+      <tr *ngIf="filteredTasks.length === 0">
+        <td colspan="6" class="slds-text-align_center slds-p-around_large">
+          <p class="slds-text-body_regular">No tasks found. Create a new task to get started!</p>
+        </td>
+      </tr>
       <tr *ngFor="let t of filteredTasks">
         <td>{{ t.assignedTo }}</td>
-        <td>{{ t.status }}</td>
-        <td>{{ t.dueDate }}</td>
-        <td>{{ t.priority }}</td>
-        <td>{{ t.description }}</td>
+        <td>
+          <span class="slds-badge" [ngClass]="{
+            'slds-badge_success': t.status === 'Completed',
+            'slds-badge_warning': t.status === 'In Progress',
+            'slds-badge_info': t.status === 'Not Started'
+          }">
+            {{ t.status }}
+          </span>
+        </td>
+        <td>{{ formatDate(t.dueDate) }}</td>
+        <td>
+          <span class="slds-badge" [ngClass]="{
+            'slds-badge_destructive': t.priority === 'High',
+            'slds-badge_warning': t.priority === 'Normal',
+            'slds-badge_info': t.priority === 'Low'
+          }">
+            {{ t.priority }}
+          </span>
+        </td>
+        <td>{{ t.description || '-' }}</td>
 
         <td class="slds-text-align_right">
-
-          <!-- Dropdown button -->
-          <div class="slds-dropdown-trigger slds-dropdown-trigger_click">
-
-            <button class="slds-button slds-button_icon" (click)="toggleDropdown(t.id)">
-              ⋮
+          <div style="display: flex; gap: 4px; align-items: center; justify-content: flex-end;">
+            <!-- Direct Action Buttons -->
+            <button 
+              class="slds-button slds-button_neutral slds-button_small" 
+              (click)="editTask(t.id)"
+              title="Edit Task"
+              style="min-width: auto; padding: 4px 8px;">
+              Edit
             </button>
+            <button 
+              class="slds-button slds-button_destructive slds-button_small" 
+              (click)="openDeleteModal(t)"
+              title="Delete Task"
+              style="min-width: auto; padding: 4px 8px;">
+              Delete
+            </button>
+            
+            <!-- Dropdown button for additional actions -->
+            <div class="slds-dropdown-trigger slds-dropdown-trigger_click" style="position: relative;">
 
-            <!-- Dropdown menu -->
-            <div *ngIf="dropdownOpenId === t.id" class="slds-dropdown slds-dropdown_right">
-              <ul class="slds-dropdown__list" role="menu">
-                <li class="slds-dropdown__item" (click)="editTask(t.id)">
-                  <span>Edit</span>
-                </li>
+              <button 
+                class="slds-button slds-button_icon slds-button_icon-border-filled" 
+                (click)="toggleDropdown(t.id); $event.stopPropagation()"
+                title="More Actions"
+                style="font-size: 18px; padding: 4px 8px;">
+              ⋯
+              </button>
 
-                <li class="slds-dropdown__item" (click)="openDeleteModal(t)">
-                  <span>Delete</span>
-                </li>
-              </ul>
-                              <!-- DELETE MODAL -->
-                <div *ngIf="showDeleteModal" class="slds-modal slds-fade-in-open">
-                  <div class="slds-modal__container">
-
-                    <header class="slds-modal__header">
-                      <h2 class="slds-text-heading_medium">Delete this task?</h2>
-                    </header>
-
-                    <div class="slds-modal__content slds-p-around_medium">
-                      <p class="slds-text-body_regular">
-                        Are you sure you want to delete
-                        <strong>{{ selectedTask?.description || 'this task' }}</strong>?
-                      </p>
-                    </div>
-
-                    <footer class="slds-modal__footer">
-                      <button class="slds-button slds-button_neutral" (click)="closeDeleteModal()">Cancel</button>
-                      <button class="slds-button slds-button_destructive" (click)="confirmDelete()">Delete</button>
-                    </footer>
-
-                  </div>
-                </div>
-
-                <div *ngIf="showDeleteModal" class="slds-backdrop slds-backdrop_open"></div>
+              <!-- Dropdown menu -->
+              <div 
+                *ngIf="dropdownOpenId === t.id" 
+                class="slds-dropdown slds-dropdown_right"
+                style="position: absolute; right: 0; top: 100%; z-index: 1000; margin-top: 4px; min-width: 180px;">
+                <ul class="slds-dropdown__list" role="menu">
+                  <li class="slds-dropdown__item" (click)="toggleCompletion(t); $event.stopPropagation()">
+                    <a role="menuitem" style="cursor: pointer; display: block; padding: 8px 12px;">
+                      <span>{{ t.status === 'Completed' ? '↩️ Mark Incomplete' : '✓ Mark Complete' }}</span>
+                    </a>
+                  </li>
+                </ul>
+              </div>
 
             </div>
-
           </div>
-
         </td>
       </tr>
     </tbody>
   </table>
+
+  <!-- DELETE MODAL (Outside table) -->
+  <div *ngIf="showDeleteModal" class="slds-modal slds-fade-in-open">
+    <div class="slds-modal__container">
+
+      <header class="slds-modal__header">
+        <h2 class="slds-text-heading_medium">Delete Task</h2>
+      </header>
+
+      <div class="slds-modal__content slds-p-around_medium">
+        <p class="slds-text-body_regular slds-m-bottom_small">
+          Are you sure you want to delete this task? This action cannot be undone.
+        </p>
+        <div class="slds-box slds-theme_shade slds-m-top_small" *ngIf="selectedTask">
+          <dl class="slds-list_horizontal slds-wrap">
+            <dt class="slds-item_label slds-text-color_weak slds-truncate">Assigned To:</dt>
+            <dd class="slds-item_detail slds-truncate"><strong>{{ selectedTask.assignedTo }}</strong></dd>
+            <dt class="slds-item_label slds-text-color_weak slds-truncate">Status:</dt>
+            <dd class="slds-item_detail slds-truncate">{{ selectedTask.status }}</dd>
+            <dt class="slds-item_label slds-text-color_weak slds-truncate">Due Date:</dt>
+            <dd class="slds-item_detail slds-truncate">{{ formatDate(selectedTask.dueDate) }}</dd>
+            <dt class="slds-item_label slds-text-color_weak slds-truncate">Priority:</dt>
+            <dd class="slds-item_detail slds-truncate">{{ selectedTask.priority }}</dd>
+            <dt class="slds-item_label slds-text-color_weak slds-truncate" *ngIf="selectedTask.description">Description:</dt>
+            <dd class="slds-item_detail slds-truncate" *ngIf="selectedTask.description">{{ selectedTask.description }}</dd>
+          </dl>
+        </div>
+      </div>
+
+      <footer class="slds-modal__footer">
+        <button class="slds-button slds-button_neutral" (click)="closeDeleteModal()">Cancel</button>
+        <button class="slds-button slds-button_destructive" (click)="confirmDelete()">
+          <span>Delete</span>
+        </button>
+      </footer>
+
+    </div>
+  </div>
+
+  <div *ngIf="showDeleteModal" class="slds-backdrop slds-backdrop_open" (click)="closeDeleteModal()"></div>
 
 </div>

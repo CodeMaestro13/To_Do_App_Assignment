@@ -17,22 +17,38 @@
 
           <!-- Assigned To -->
           <div class="slds-col">
-            <label class="slds-form-element__label">Assigned To *</label>
-            <select class="slds-input" formControlName="assignedTo">
-              <option>User 1</option>
-              <option>User 2</option>
-              <option>User 3</option>
-            </select>
+            <label class="slds-form-element__label">
+              <abbr class="slds-required" title="required">*</abbr> Assigned To
+            </label>
+            <div class="slds-form-element__control">
+              <select class="slds-input" formControlName="assignedTo" [class.slds-has-error]="form.get('assignedTo')?.invalid && form.get('assignedTo')?.touched">
+                <option value="">-- Select User --</option>
+                <option value="User 1">User 1</option>
+                <option value="User 2">User 2</option>
+                <option value="User 3">User 3</option>
+              </select>
+              <div class="slds-form-element__help" *ngIf="form.get('assignedTo')?.invalid && form.get('assignedTo')?.touched">
+                Assigned To is required
+              </div>
+            </div>
           </div>
 
           <!-- Status -->
           <div class="slds-col">
-            <label class="slds-form-element__label">Status *</label>
-            <select class="slds-input" formControlName="status">
-              <option>Not Started</option>
-              <option>In Progress</option>
-              <option>Completed</option>
-            </select>
+            <label class="slds-form-element__label">
+              <abbr class="slds-required" title="required">*</abbr> Status
+            </label>
+            <div class="slds-form-element__control">
+              <select class="slds-input" formControlName="status" [class.slds-has-error]="form.get('status')?.invalid && form.get('status')?.touched">
+                <option value="">-- Select Status --</option>
+                <option value="Not Started">Not Started</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
+              <div class="slds-form-element__help" *ngIf="form.get('status')?.invalid && form.get('status')?.touched">
+                Status is required
+              </div>
+            </div>
           </div>
 
         </div>
@@ -42,27 +58,44 @@
 
           <!-- Due Date -->
           <div class="slds-col">
-            <label class="slds-form-element__label">Due Date *</label>
-            <input type="date" class="slds-input" formControlName="dueDate" />
+            <label class="slds-form-element__label">
+              <abbr class="slds-required" title="required">*</abbr> Due Date
+            </label>
+            <div class="slds-form-element__control">
+              <input type="date" class="slds-input" formControlName="dueDate" [class.slds-has-error]="form.get('dueDate')?.invalid && form.get('dueDate')?.touched" />
+              <div class="slds-form-element__help" *ngIf="form.get('dueDate')?.invalid && form.get('dueDate')?.touched">
+                Due Date is required
+              </div>
+            </div>
           </div>
 
           <!-- Priority -->
           <div class="slds-col">
-            <label class="slds-form-element__label">Priority *</label>
-            <select class="slds-input" formControlName="priority">
-              <option>Low</option>
-              <option>Normal</option>
-              <option>High</option>
-            </select>
+            <label class="slds-form-element__label">
+              <abbr class="slds-required" title="required">*</abbr> Priority
+            </label>
+            <div class="slds-form-element__control">
+              <select class="slds-input" formControlName="priority" [class.slds-has-error]="form.get('priority')?.invalid && form.get('priority')?.touched">
+                <option value="">-- Select Priority --</option>
+                <option value="Low">Low</option>
+                <option value="Normal">Normal</option>
+                <option value="High">High</option>
+              </select>
+              <div class="slds-form-element__help" *ngIf="form.get('priority')?.invalid && form.get('priority')?.touched">
+                Priority is required
+              </div>
+            </div>
           </div>
 
         </div>
 
         <!-- DESCRIPTION -->
-        <label class="slds-form-element__label slds-m-top_small">
-          Description
-        </label>
-        <textarea class="slds-textarea" formControlName="description"></textarea>
+        <div class="slds-m-top_small">
+          <label class="slds-form-element__label">Description</label>
+          <div class="slds-form-element__control">
+            <textarea class="slds-textarea" formControlName="description" placeholder="Enter task description (optional)"></textarea>
+          </div>
+        </div>
 
       </form>
     </div>

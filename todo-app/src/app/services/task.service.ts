@@ -43,6 +43,7 @@ export class TaskService {
   /** Add new task */
   addTask(task: Task) {
     this.tasks.push(task);
+    console.log(this.tasks);
     this.saveToStorage();
   }
 
